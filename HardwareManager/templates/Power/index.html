@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='Css/bootstrap.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='Css/bootstrap-responsive.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='Css/style.css') }}"/>
+    <script type="text/javascript" src="{{ url_for('static', filename='Js/jquery.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='Js/jquery.sorted.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='Js/bootstrap.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='Js/ckform.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='Js/common.js') }}"></script>
+
+    <style type="text/css">
+        body {
+            padding-bottom: 40px;
+        }
+        .sidebar-nav {
+            padding: 9px 0;
+        }
+
+        @media (max-width: 980px) {
+            /* Enable use of floated navbar text */
+            .navbar-text.pull-right {
+                float: none;
+                padding-left: 5px;
+                padding-right: 5px;
+            }
+        }
+
+
+    </style>
+</head>
+<body>
+<form id="form" class="form-inline definewidth m20" action="/Power/index/1" method="post">
+    <input type="hidden" name="condition" id="condition" value="{{ condition }}">
+    产品名称：
+    <input type="text" name="search_content" id="search_content" class="abc input-default" placeholder=""
+           value="{{ condition }}">&nbsp;&nbsp;
+    <button type="button" onclick="doSearch()" class="btn btn-primary">查询</button>
+    &nbsp;&nbsp;
+    <button type="button" class="btn btn-success" id="sync_btn">同步</button>
+</form>
+<table class="table table-bordered table-hover definewidth m10">
+    <thead>
+    <tr>
+        <th>产品编号</th>
+        <th>名称</th>
+        <th>价格</th>
+        <th>额定功率</th>
+        <th>80plus认证</th>
+        <th>PFC类型</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    {% for power in powers %}
+    <tr>
+        <td>{{ power.zolId }}</td>
+        <td>{{ power.name }}</td>
+        <td>{{ power.price }}</td>
+        <td>{{ power.ratedPower }}</td>
+        <td>{{ power.plusAuth }}</td>
+        <td>{{ power.pfc }}</td>
+        <td>
+            <a href="edit.html">编辑</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+<div class="inline pull-right page">
+    {{ pageInfo.recordCount }} 条记录 {{ pageInfo.currentPage }}/{{ pageInfo.pageCount }} 页
+    {% if pageInfo.prePage!=0 %}
+    <a href="javascript:goPage({{ pageInfo.prePage }})">上一页</a>
+    {% endif %}
+    {% if pageInfo.nextPage<=pageInfo.pageCount %}
+    <a href="javascript:goPage({{ pageInfo.nextPage }})">下一页</a>
+    {% endif %}
+</div>
+</body>
+</html>
+<script>
+    $(function () {
+		$('#sync_btn').click(function(){
+		    $('#sync_btn').text('同步中')
+				 $.ajax( {
+                    type : "POST",
+                    url : "/Power/sync",
+                    dataType : "json",
+                    data : {
+                    },
+                    error: function( XMLResponse ) {
+                        alert( XMLResponse.responseText )
+                    },
+                    success : function ( data, textStatus ) {
+                        if(data.result){
+                            location.href ='/Power/index/1';
+                        }else{
+                            $( "#msg" ).show()
+                        }
+                         $('#sync_btn').text('同步')
+                    }
+                } );
+		 });
+    });
+
+	function del(id)
+	{
+		if(confirm("确定要删除吗？")){
+			var url = "index.html";
+			window.location.href=url;
+		}
+	}
+
+	function goPage(page)
+	{
+        var form =  document.getElementById("form")
+        form.action = "/Power/index/"+page;
+        form.submit();
+	}
+
+    function doSearch()
+    {
+        var searchContent = $('#search_content').val();
+        $('#condition').val(searchContent);
+        var form =  document.getElementById("form");
+        form.action = "/Power/index/1";
+        form.submit();
+    }
+
+</script>
